@@ -69,10 +69,7 @@ Open a terminal, navigate to the folder where you want the project, and run:
 
 ```bash
 git clone https://github.com/Bhavika-Giyanani/CodeVimarsh-Backend.git
-cd CodeVimarsh-Backend/backend
 ```
-
-You are now inside the `backend/` folder — this is the root of the project.
 
 ---
 
