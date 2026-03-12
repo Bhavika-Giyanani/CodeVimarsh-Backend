@@ -116,7 +116,6 @@ export const verifyEmail = async (token) => {
 export const resendVerification = async (email) => {
   const user = await prisma.user.findUnique({ where: { email } });
 
-  // Prevent user enumeration – always return the same message
   if (!user) {
     return {
       message: "If that email exists, a new verification link has been sent.",
@@ -219,7 +218,6 @@ export const getMe = async (userId) => {
 export const forgotPassword = async (email) => {
   const user = await prisma.user.findUnique({ where: { email } });
 
-  // Prevent enumeration
   if (!user) {
     return { message: "If that email exists, a reset link has been sent." };
   }

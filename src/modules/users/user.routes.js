@@ -2,7 +2,7 @@ import { Router } from "express";
 import * as userController from "./user.controller.js";
 import { authenticate } from "../../middleware/auth.middleware.js";
 import { validate } from "../../middleware/validate.middleware.js";
-import { updateProfileSchema } from "./user.schema.js";
+import { updateProfileSchema, adminUpdateUserSchema } from "./user.schema.js";
 
 const router = Router();
 
@@ -78,11 +78,18 @@ router.get("/:id", userController.getUserById);
  *       403:
  *         description: Forbidden
  */
+
 router.put(
   "/:id",
   authenticate,
-  validate(updateProfileSchema),
-  userController.updateUserById
+  (req, res, next) => {
+    const schema =
+      req.user.role === "SUPER_ADMIN"
+        ? adminUpdateUserSchema
+        : updateProfileSchema;
+    return validate(schema)(req, res, next);
+  },
+  userController.updateUserById,
 );
 
 export default router;

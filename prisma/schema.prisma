@@ -1,8 +1,3 @@
-// Prisma 7 schema
-// - Uses the new ESM-first "prisma-client" generator
-// - Output goes to ../generated/prisma so imports are clean and explicit
-// - No url/directUrl here – managed entirely in prisma.config.ts
-
 generator client {
   provider = "prisma-client"
   output   = "../generated/prisma"
@@ -18,7 +13,6 @@ datasource db {
 
 enum UserRole {
   USER
-  MODERATOR
   CONTENT_ADMIN
   SUPER_ADMIN
 }
@@ -35,6 +29,12 @@ enum EventStatus {
   Past
 }
 
+enum ExperienceLevel {
+  Beginner
+  Intermediate
+  Advanced
+}
+
 enum RegistrationStatus {
   Registered
   Attended
@@ -47,37 +47,21 @@ enum ProjectStatus {
   Rejected
 }
 
-enum BlogStatus {
-  Draft
-  Published
-}
-
-enum ResourceType {
-  Video
-  PDF
-  Tool
-  Cheatsheet
-}
-
-enum ResourceStatus {
-  Approved
-  Pending
-}
-
-enum RoadmapCategory {
+enum ProjectCategory {
   Web
+  Mobile
+  DesktopApp
   DataScience
-  CP
+  MachineLearning
+  DevOps
+  Blockchain
+  GameDev
+  Other
 }
 
 enum ContactStatus {
   Open
   Resolved
-}
-
-enum TestimonialStatus {
-  Approved
-  Pending
 }
 
 // ─────────────────────────────────────────────
@@ -103,11 +87,7 @@ model User {
   event_registrations       EventRegistration[]
   created_projects          Project[]                @relation("ProjectCreator")
   project_memberships       ProjectMember[]
-  blogs                     Blog[]
-  resources                 Resource[]
-  user_achievements         UserAchievement[]
   certificates              Certificate[]
-  testimonials              Testimonial[]
   contact_messages          ContactMessage[]
   email_verification_tokens EmailVerificationToken[]
   password_reset_tokens     PasswordResetToken[]
@@ -170,9 +150,9 @@ model PasswordResetToken {
 
 model Event {
   id               String      @id @default(cuid())
-  name             String
   title            String
-  description      String?
+  description      String?     // Short description / subtitle
+  long_description String?     // Rich/detailed event description
   type             EventType
   status           EventStatus @default(Upcoming)
   location         String?
@@ -180,20 +160,44 @@ model Event {
   end_date         DateTime?
   max_participants Int?
   banner_image     String?
+  topics           String[]    // Tags/topics as an array of strings
   created_by       String
+  created_at       DateTime    @default(now())
 
+  speakers      EventSpeaker[]
   registrations EventRegistration[]
   certificates  Certificate[]
 
   @@map("events")
 }
 
+model EventSpeaker {
+  id          String  @id @default(cuid())
+  event_id    String
+  name        String
+  designation String?
+  avatar      String?
+  bio         String?
+
+  event Event @relation(fields: [event_id], references: [id], onDelete: Cascade)
+
+  @@map("event_speakers")
+}
+
 model EventRegistration {
-  id            String             @id @default(cuid())
-  user_id       String
-  event_id      String
-  status        RegistrationStatus @default(Registered)
-  registered_at DateTime           @default(now())
+  id                     String             @id @default(cuid())
+  user_id                String
+  event_id               String
+  status                 RegistrationStatus @default(Registered)
+  // Registration form fields
+  full_name              String
+  email                  String
+  whatsapp_number        String
+  github_username        String?
+  experience_level       ExperienceLevel
+  areas_of_interest      String[]           // Stored as an array of strings
+  reason_for_participation String?
+  registered_at          DateTime           @default(now())
 
   user  User  @relation(fields: [user_id], references: [id], onDelete: Cascade)
   event Event @relation(fields: [event_id], references: [id], onDelete: Cascade)
@@ -207,16 +211,19 @@ model EventRegistration {
 // ─────────────────────────────────────────────
 
 model Project {
-  id          String        @id @default(cuid())
-  title       String
-  description String?
-  image       String?
-  repo_link   String?
-  demo_link   String?
-  video_link  String?
-  status      ProjectStatus @default(Pending)
-  created_by  String
-  created_at  DateTime      @default(now())
+  id                String          @id @default(cuid())
+  title             String
+  short_description String?         // Brief summary shown in cards/listings
+  category          ProjectCategory @default(Web)
+  about             String?         // Lengthy description of the project
+  key_features      String[]        // List of key features
+  tech_stack        String[]        // Technologies used
+  github_link       String?
+  image             String?
+  author_name       String          // Display name of the author
+  status            ProjectStatus   @default(Pending)
+  created_by        String
+  created_at        DateTime        @default(now())
 
   creator User            @relation("ProjectCreator", fields: [created_by], references: [id])
   members ProjectMember[]
@@ -237,100 +244,6 @@ model ProjectMember {
 }
 
 // ─────────────────────────────────────────────
-//  Blogs
-// ─────────────────────────────────────────────
-
-model Blog {
-  id          String     @id @default(cuid())
-  title       String
-  content     String
-  cover_image String?
-  status      BlogStatus @default(Draft)
-  author_id   String
-  created_at  DateTime   @default(now())
-
-  author User @relation(fields: [author_id], references: [id], onDelete: Cascade)
-
-  @@map("blogs")
-}
-
-// ─────────────────────────────────────────────
-//  Resources
-// ─────────────────────────────────────────────
-
-model Resource {
-  id          String         @id @default(cuid())
-  title       String
-  type        ResourceType
-  link        String
-  uploaded_by String
-  status      ResourceStatus @default(Pending)
-  created_at  DateTime       @default(now())
-
-  uploader User @relation(fields: [uploaded_by], references: [id], onDelete: Cascade)
-
-  @@map("resources")
-}
-
-// ─────────────────────────────────────────────
-//  Roadmaps
-// ─────────────────────────────────────────────
-
-model Roadmap {
-  id          String          @id @default(cuid())
-  title       String
-  description String?
-  category    RoadmapCategory
-  created_by  String
-
-  nodes RoadmapNode[]
-
-  @@map("roadmaps")
-}
-
-model RoadmapNode {
-  id             String  @id @default(cuid())
-  roadmap_id     String
-  title          String
-  description    String?
-  resource_link  String?
-  sequence_order Int
-
-  roadmap Roadmap @relation(fields: [roadmap_id], references: [id], onDelete: Cascade)
-
-  @@map("roadmap_nodes")
-}
-
-// ─────────────────────────────────────────────
-//  Achievements & XP
-// ─────────────────────────────────────────────
-
-model Achievement {
-  id          String  @id @default(cuid())
-  title       String
-  description String?
-  badge_image String?
-  xp_reward   Int     @default(0)
-
-  user_achievements UserAchievement[]
-
-  @@map("achievements")
-}
-
-model UserAchievement {
-  id             String   @id @default(cuid())
-  user_id        String
-  achievement_id String
-  earned_at      DateTime @default(now())
-
-  user        User        @relation(fields: [user_id], references: [id], onDelete: Cascade)
-  achievement Achievement @relation(fields: [achievement_id], references: [id], onDelete: Cascade)
-
-  @@unique([user_id, achievement_id])
-  @@map("user_achievements")
-}
-
-// ─────────────────────────────────────────────
 //  Certificates
 // ─────────────────────────────────────────────
 
@@ -348,24 +261,6 @@ model Certificate {
 }
 
 // ─────────────────────────────────────────────
-//  Testimonials
-// ─────────────────────────────────────────────
-
-model Testimonial {
-  id          String            @id @default(cuid())
-  user_id     String
-  event_id    String
-  quote       String
-  company     String?
-  designation String?
-  status      TestimonialStatus @default(Pending)
-
-  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
-
-  @@map("testimonials")
-}
-
-// ─────────────────────────────────────────────
 //  Contact Messages
 // ─────────────────────────────────────────────
 
@@ -373,6 +268,7 @@ model ContactMessage {
   id         String        @id @default(cuid())
   name       String
   email      String
+  subject    String
   message    String
   status     ContactStatus @default(Open)
   user_id    String?

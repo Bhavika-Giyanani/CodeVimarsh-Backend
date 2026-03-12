@@ -1,5 +1,5 @@
 -- CreateEnum
-CREATE TYPE "UserRole" AS ENUM ('USER', 'MODERATOR', 'CONTENT_ADMIN', 'SUPER_ADMIN');
+CREATE TYPE "UserRole" AS ENUM ('USER', 'CONTENT_ADMIN', 'SUPER_ADMIN');
 
 -- CreateEnum
 CREATE TYPE "EventType" AS ENUM ('Workshop', 'Hackathon', 'Meetup');
@@ -8,28 +8,19 @@ CREATE TYPE "EventType" AS ENUM ('Workshop', 'Hackathon', 'Meetup');
 CREATE TYPE "EventStatus" AS ENUM ('Upcoming', 'Live', 'Past');
 
 -- CreateEnum
+CREATE TYPE "ExperienceLevel" AS ENUM ('Beginner', 'Intermediate', 'Advanced');
+
+-- CreateEnum
 CREATE TYPE "RegistrationStatus" AS ENUM ('Registered', 'Attended', 'Cancelled');
 
 -- CreateEnum
 CREATE TYPE "ProjectStatus" AS ENUM ('Pending', 'Approved', 'Rejected');
 
 -- CreateEnum
-CREATE TYPE "BlogStatus" AS ENUM ('Draft', 'Published');
-
--- CreateEnum
-CREATE TYPE "ResourceType" AS ENUM ('Video', 'PDF', 'Tool', 'Cheatsheet');
-
--- CreateEnum
-CREATE TYPE "ResourceStatus" AS ENUM ('Approved', 'Pending');
-
--- CreateEnum
-CREATE TYPE "RoadmapCategory" AS ENUM ('Web', 'DataScience', 'CP');
+CREATE TYPE "ProjectCategory" AS ENUM ('Web', 'Mobile', 'DesktopApp', 'DataScience', 'MachineLearning', 'DevOps', 'Blockchain', 'GameDev', 'Other');
 
 -- CreateEnum
 CREATE TYPE "ContactStatus" AS ENUM ('Open', 'Resolved');
-
--- CreateEnum
-CREATE TYPE "TestimonialStatus" AS ENUM ('Approved', 'Pending');
 
 -- CreateTable
 CREATE TABLE "users" (
@@ -91,9 +82,9 @@ CREATE TABLE "password_reset_tokens" (
 -- CreateTable
 CREATE TABLE "events" (
     "id" TEXT NOT NULL,
-    "name" TEXT NOT NULL,
     "title" TEXT NOT NULL,
     "description" TEXT,
+    "long_description" TEXT,
     "type" "EventType" NOT NULL,
     "status" "EventStatus" NOT NULL DEFAULT 'Upcoming',
     "location" TEXT,
@@ -101,9 +92,23 @@ CREATE TABLE "events" (
     "end_date" TIMESTAMP(3),
     "max_participants" INTEGER,
     "banner_image" TEXT,
+    "topics" TEXT[],
     "created_by" TEXT NOT NULL,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "events_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "event_speakers" (
+    "id" TEXT NOT NULL,
+    "event_id" TEXT NOT NULL,
+    "name" TEXT NOT NULL,
+    "designation" TEXT,
+    "avatar" TEXT,
+    "bio" TEXT,
+
+    CONSTRAINT "event_speakers_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -112,6 +117,13 @@ CREATE TABLE "event_registrations" (
     "user_id" TEXT NOT NULL,
     "event_id" TEXT NOT NULL,
     "status" "RegistrationStatus" NOT NULL DEFAULT 'Registered',
+    "full_name" TEXT NOT NULL,
+    "email" TEXT NOT NULL,
+    "whatsapp_number" TEXT NOT NULL,
+    "github_username" TEXT,
+    "experience_level" "ExperienceLevel" NOT NULL,
+    "areas_of_interest" TEXT[],
+    "reason_for_participation" TEXT,
     "registered_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "event_registrations_pkey" PRIMARY KEY ("id")
@@ -121,11 +133,14 @@ CREATE TABLE "event_registrations" (
 CREATE TABLE "projects" (
     "id" TEXT NOT NULL,
     "title" TEXT NOT NULL,
-    "description" TEXT,
+    "short_description" TEXT,
+    "category" "ProjectCategory" NOT NULL DEFAULT 'Web',
+    "about" TEXT,
+    "key_features" TEXT[],
+    "tech_stack" TEXT[],
+    "github_link" TEXT,
     "image" TEXT,
-    "repo_link" TEXT,
-    "demo_link" TEXT,
-    "video_link" TEXT,
+    "author_name" TEXT NOT NULL,
     "status" "ProjectStatus" NOT NULL DEFAULT 'Pending',
     "created_by" TEXT NOT NULL,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -143,76 +158,6 @@ CREATE TABLE "project_members" (
 );
 
 -- CreateTable
-CREATE TABLE "blogs" (
-    "id" TEXT NOT NULL,
-    "title" TEXT NOT NULL,
-    "content" TEXT NOT NULL,
-    "cover_image" TEXT,
-    "status" "BlogStatus" NOT NULL DEFAULT 'Draft',
-    "author_id" TEXT NOT NULL,
-    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-
-    CONSTRAINT "blogs_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "resources" (
-    "id" TEXT NOT NULL,
-    "title" TEXT NOT NULL,
-    "type" "ResourceType" NOT NULL,
-    "link" TEXT NOT NULL,
-    "uploaded_by" TEXT NOT NULL,
-    "status" "ResourceStatus" NOT NULL DEFAULT 'Pending',
-    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-
-    CONSTRAINT "resources_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "roadmaps" (
-    "id" TEXT NOT NULL,
-    "title" TEXT NOT NULL,
-    "description" TEXT,
-    "category" "RoadmapCategory" NOT NULL,
-    "created_by" TEXT NOT NULL,
-
-    CONSTRAINT "roadmaps_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "roadmap_nodes" (
-    "id" TEXT NOT NULL,
-    "roadmap_id" TEXT NOT NULL,
-    "title" TEXT NOT NULL,
-    "description" TEXT,
-    "resource_link" TEXT,
-    "sequence_order" INTEGER NOT NULL,
-
-    CONSTRAINT "roadmap_nodes_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "achievements" (
-    "id" TEXT NOT NULL,
-    "title" TEXT NOT NULL,
-    "description" TEXT,
-    "badge_image" TEXT,
-    "xp_reward" INTEGER NOT NULL DEFAULT 0,
-
-    CONSTRAINT "achievements_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "user_achievements" (
-    "id" TEXT NOT NULL,
-    "user_id" TEXT NOT NULL,
-    "achievement_id" TEXT NOT NULL,
-    "earned_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-
-    CONSTRAINT "user_achievements_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
 CREATE TABLE "certificates" (
     "id" TEXT NOT NULL,
     "user_id" TEXT NOT NULL,
@@ -224,23 +169,11 @@ CREATE TABLE "certificates" (
 );
 
 -- CreateTable
-CREATE TABLE "testimonials" (
-    "id" TEXT NOT NULL,
-    "user_id" TEXT NOT NULL,
-    "event_id" TEXT NOT NULL,
-    "quote" TEXT NOT NULL,
-    "company" TEXT,
-    "designation" TEXT,
-    "status" "TestimonialStatus" NOT NULL DEFAULT 'Pending',
-
-    CONSTRAINT "testimonials_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
 CREATE TABLE "contact_messages" (
     "id" TEXT NOT NULL,
     "name" TEXT NOT NULL,
     "email" TEXT NOT NULL,
+    "subject" TEXT NOT NULL,
     "message" TEXT NOT NULL,
     "status" "ContactStatus" NOT NULL DEFAULT 'Open',
     "user_id" TEXT,
@@ -270,9 +203,6 @@ CREATE UNIQUE INDEX "event_registrations_user_id_event_id_key" ON "event_registr
 -- CreateIndex
 CREATE UNIQUE INDEX "project_members_project_id_user_id_key" ON "project_members"("project_id", "user_id");
 
--- CreateIndex
-CREATE UNIQUE INDEX "user_achievements_user_id_achievement_id_key" ON "user_achievements"("user_id", "achievement_id");
-
 -- AddForeignKey
 ALTER TABLE "admins" ADD CONSTRAINT "admins_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
@@ -281,6 +211,9 @@ ALTER TABLE "email_verification_tokens" ADD CONSTRAINT "email_verification_token
 
 -- AddForeignKey
 ALTER TABLE "password_reset_tokens" ADD CONSTRAINT "password_reset_tokens_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "event_speakers" ADD CONSTRAINT "event_speakers_event_id_fkey" FOREIGN KEY ("event_id") REFERENCES "events"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "event_registrations" ADD CONSTRAINT "event_registrations_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
@@ -298,28 +231,10 @@ ALTER TABLE "project_members" ADD CONSTRAINT "project_members_project_id_fkey" F
 ALTER TABLE "project_members" ADD CONSTRAINT "project_members_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "blogs" ADD CONSTRAINT "blogs_author_id_fkey" FOREIGN KEY ("author_id") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "resources" ADD CONSTRAINT "resources_uploaded_by_fkey" FOREIGN KEY ("uploaded_by") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "roadmap_nodes" ADD CONSTRAINT "roadmap_nodes_roadmap_id_fkey" FOREIGN KEY ("roadmap_id") REFERENCES "roadmaps"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "user_achievements" ADD CONSTRAINT "user_achievements_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "user_achievements" ADD CONSTRAINT "user_achievements_achievement_id_fkey" FOREIGN KEY ("achievement_id") REFERENCES "achievements"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
 ALTER TABLE "certificates" ADD CONSTRAINT "certificates_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "certificates" ADD CONSTRAINT "certificates_event_id_fkey" FOREIGN KEY ("event_id") REFERENCES "events"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "testimonials" ADD CONSTRAINT "testimonials_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "contact_messages" ADD CONSTRAINT "contact_messages_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE SET NULL ON UPDATE CASCADE;

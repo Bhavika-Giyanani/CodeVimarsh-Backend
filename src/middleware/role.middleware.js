@@ -1,17 +1,16 @@
 /**
  * Role hierarchy (ascending privilege):
- *   USER  <  MODERATOR  <  CONTENT_ADMIN  <  SUPER_ADMIN
+ *   USER  <  CONTENT_ADMIN  <  SUPER_ADMIN
  *
  * Usage examples:
  *   router.delete("/route", authenticate, requireRole("SUPER_ADMIN"), handler)
- *   router.get("/route",    authenticate, requireModerator, handler)
+ *   router.get("/route",    authenticate, requireContentAdmin, handler)
  */
 
 const ROLE_HIERARCHY = {
   USER: 0,
-  MODERATOR: 1,
-  CONTENT_ADMIN: 2,
-  SUPER_ADMIN: 3,
+  CONTENT_ADMIN: 1,
+  SUPER_ADMIN: 2,
 };
 
 /**
@@ -53,6 +52,3 @@ export const requireSuperAdmin = requireRole("SUPER_ADMIN");
 
 /** CONTENT_ADMIN and above */
 export const requireContentAdmin = requireRole("CONTENT_ADMIN");
-
-/** MODERATOR and above */
-export const requireModerator = requireRole("MODERATOR");

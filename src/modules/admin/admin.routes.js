@@ -3,7 +3,7 @@ import * as adminController from "./admin.controller.js";
 import { authenticate } from "../../middleware/auth.middleware.js";
 import {
   requireSuperAdmin,
-  requireModerator,
+  requireContentAdmin,
 } from "../../middleware/role.middleware.js";
 
 const router = Router();
@@ -22,7 +22,7 @@ router.use(authenticate);
  * @swagger
  * /admin/users:
  *   get:
- *     summary: List all users with roles (MODERATOR and above)
+ *     summary: List all users with roles (CONTENT_ADMIN and above)
  *     tags: [Admin]
  *     security:
  *       - BearerAuth: []
@@ -43,13 +43,13 @@ router.use(authenticate);
  *       403:
  *         description: Forbidden
  */
-router.get("/users", requireModerator, adminController.getAllUsers);
+router.get("/users", requireContentAdmin, adminController.getAllUsers);
 
 /**
  * @swagger
  * /admin/users/{userId}:
  *   get:
- *     summary: View a user's full profile (MODERATOR and above)
+ *     summary: View a user's full profile (CONTENT_ADMIN and above)
  *     tags: [Admin]
  *     security:
  *       - BearerAuth: []
@@ -65,7 +65,7 @@ router.get("/users", requireModerator, adminController.getAllUsers);
  *       404:
  *         description: User not found
  */
-router.get("/users/:userId", requireModerator, adminController.getUserProfile);
+router.get("/users/:userId", requireContentAdmin, adminController.getUserProfile);
 
 /**
  * @swagger
@@ -91,7 +91,7 @@ router.get("/users/:userId", requireModerator, adminController.getUserProfile);
  *             properties:
  *               role:
  *                 type: string
- *                 enum: [USER, MODERATOR, CONTENT_ADMIN, SUPER_ADMIN]
+ *                 enum: [USER, CONTENT_ADMIN, SUPER_ADMIN]
  *     responses:
  *       200:
  *         description: Role updated successfully

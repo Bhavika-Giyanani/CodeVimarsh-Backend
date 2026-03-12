@@ -7,6 +7,7 @@ import swaggerUi from "swagger-ui-express";
 import swaggerSpec from "./config/swagger.js";
 import { apiLimiter } from "./middleware/rateLimit.middleware.js";
 import { errorMiddleware } from "./middleware/error.middleware.js";
+import morgan from "morgan";
 
 import authRoutes from "./modules/auth/auth.routes.js";
 import userRoutes from "./modules/users/user.routes.js";
@@ -19,6 +20,7 @@ app.use(helmet());
 app.use(cors({ origin: process.env.CLIENT_URL, credentials: true }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(morgan("dev"));
 
 // ── Rate Limiting ─────────────────────────────────────────────────────────────
 app.use("/api", apiLimiter);

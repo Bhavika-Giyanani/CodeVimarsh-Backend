@@ -36,16 +36,6 @@ const usersData = [
     level: 11,
     is_verified: true,
   },
-  {
-    prn: "8022003913",
-    name: "Vaishali R",
-    email: "vaishali@gmail.com",
-    password: "DevPass@123",
-    role: "MODERATOR",
-    xp: 750,
-    level: 7,
-    is_verified: true,
-  },
 ];
 
 // ── Admin permission sets ─────────────────────────────────────────────────────
@@ -73,14 +63,6 @@ const adminPermissions: Record<string, {
     can_manage_users: false,
     can_manage_achievements: true,
   },
-  "8022003913": {
-    can_manage_events: false,
-    can_manage_projects: true,
-    can_manage_blogs: true,
-    can_manage_resources: true,
-    can_manage_users: false,
-    can_manage_achievements: false,
-  },
 };
 
 // ── Main ──────────────────────────────────────────────────────────────────────
@@ -102,7 +84,7 @@ async function main() {
         name: userData.name,
         email: userData.email,
         password: hashedPassword,
-        role: userData.role as "USER" | "MODERATOR" | "CONTENT_ADMIN" | "SUPER_ADMIN",
+        role: userData.role as "USER" | "CONTENT_ADMIN" | "SUPER_ADMIN",
         xp: userData.xp,
         level: userData.level,
         is_verified: userData.is_verified,

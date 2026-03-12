@@ -1,17 +1,9 @@
 import prisma from "../../config/prisma.js";
 
-const ASSIGNABLE_ROLES = ["USER", "MODERATOR", "CONTENT_ADMIN", "SUPER_ADMIN"];
+const ASSIGNABLE_ROLES = ["USER", "CONTENT_ADMIN", "SUPER_ADMIN"];
 
-// Default permission sets keyed by role
+//^ Default permission sets keyed by role
 const ROLE_PERMISSIONS = {
-  MODERATOR: {
-    can_manage_events: false,
-    can_manage_projects: true,
-    can_manage_blogs: true,
-    can_manage_resources: true,
-    can_manage_users: false,
-    can_manage_achievements: false,
-  },
   CONTENT_ADMIN: {
     can_manage_events: true,
     can_manage_projects: true,
@@ -57,7 +49,7 @@ export const changeUserRole = async (requesterId, targetUserId, newRole) => {
     throw error;
   }
 
-  const isAdminRole = ["MODERATOR", "CONTENT_ADMIN", "SUPER_ADMIN"].includes(newRole);
+  const isAdminRole = ["CONTENT_ADMIN", "SUPER_ADMIN"].includes(newRole);
 
   await prisma.$transaction(async (tx) => {
     await tx.user.update({
@@ -80,7 +72,7 @@ export const changeUserRole = async (requesterId, targetUserId, newRole) => {
   return { message: `User role updated to ${newRole} successfully.` };
 };
 
-/** List all users – paginated (MODERATOR and above) */
+/** List all users – paginated (CONTENT_ADMIN and above) */
 export const getAllUsers = async ({ page = 1, limit = 20 } = {}) => {
   const skip = (page - 1) * limit;
 
@@ -113,7 +105,6 @@ export const getUserProfile = async (userId) => {
     where: { id: userId },
     include: {
       admin: true,
-      user_achievements: { include: { achievement: true } },
       certificates: { include: { event: true } },
     },
   });
