@@ -12,6 +12,7 @@ import morgan from "morgan";
 import authRoutes from "./modules/auth/auth.routes.js";
 import userRoutes from "./modules/users/user.routes.js";
 import adminRoutes from "./modules/admin/admin.routes.js";
+import contactRoutes from "./modules/contact/contactRoutes.js";
 
 const app = express();
 
@@ -32,6 +33,7 @@ app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/users", userRoutes);
 app.use("/api/v1/admin", adminRoutes);
+app.use("/api/v1/contact", contactRoutes);
 
 // ── Health Check ──────────────────────────────────────────────────────────────
 app.get("/health", (_req, res) => {
