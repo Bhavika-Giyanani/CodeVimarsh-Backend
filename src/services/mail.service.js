@@ -71,3 +71,27 @@ export const sendPasswordResetEmail = async (toEmail, userName, token) => {
     `,
   });
 };
+
+/**
+ * Sends a thank you email after a user registers for an event.
+ * @param {string} toEmail
+ * @param {string} userName
+ * @param {string} eventName
+ */
+export const sendEventRegistrationEmail = async (toEmail, userName, eventName) => {
+  await transporter.sendMail({
+    from: `"Code Vimarsh" <${process.env.SMTP_USER}>`,
+    to: toEmail,
+    subject: `Registration Successful for ${eventName}!`,
+    html: `
+      <div style="font-family:Arial,sans-serif;max-width:600px;margin:auto">
+        <h2 style="color:#fe8a16">Thank You for Registering, ${userName}! 🚀</h2>
+        <p>You have successfully registered for the event: <strong>${eventName}</strong>.</p>
+        <p>We are excited to have you on board. Stay tuned for more updates about the event schedule and prerequisites.</p>
+        <p style="margin-top:16px;font-size:13px;color:#666">
+          If you have any questions, feel free to reply to this email or contact our support team.
+        </p>
+      </div>
+    `,
+  });
+};

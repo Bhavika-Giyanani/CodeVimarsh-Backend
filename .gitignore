@@ -3,3 +3,5 @@ node_modules/
 generated/
 *.log
 .DS_Store
+CodeVimarsh.postman_collection.json
+CodeVimarsh.postman_environment.json
