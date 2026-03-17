@@ -14,7 +14,7 @@ import userRoutes from "./modules/users/user.routes.js";
 import adminRoutes from "./modules/admin/admin.routes.js";
 import projectRoutes from "./modules/projects/project.routes.js";
 import eventsRoutes from "./modules/events/events.routes.js";
-import contactRoutes from "./modules/contact/contactRoutes.js";
+import contactRoutes from "./modules/contact/contact.routes.js";
 
 const app = express();
 
