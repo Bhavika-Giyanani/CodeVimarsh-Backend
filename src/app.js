@@ -13,6 +13,7 @@ import authRoutes from "./modules/auth/auth.routes.js";
 import userRoutes from "./modules/users/user.routes.js";
 import adminRoutes from "./modules/admin/admin.routes.js";
 import projectRoutes from "./modules/projects/project.routes.js";
+import eventsRoutes from "./modules/events/events.routes.js";
 
 const app = express();
 
@@ -34,6 +35,7 @@ app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/users", userRoutes);
 app.use("/api/v1/admin", adminRoutes);
 app.use("/api/v1/projects", projectRoutes);
+app.use("/api/v1/events", eventsRoutes);
 
 // ── Health Check ──────────────────────────────────────────────────────────────
 app.get("/health", (_req, res) => {
