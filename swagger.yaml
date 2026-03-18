@@ -37,7 +37,7 @@ paths:
           description: Paginated list of all users
         "403":
           description: Forbidden
-  /admin/users/{userId}:
+  "/admin/users/{userId}":
     get:
       summary: View a user's full profile (CONTENT_ADMIN and above)
       tags:
@@ -55,7 +55,7 @@ paths:
           description: Full user profile with admin data
         "404":
           description: User not found
-  /admin/users/{userId}/role:
+  "/admin/users/{userId}/role":
     patch:
       summary: Change a user's role (SUPER_ADMIN only)
       tags:
@@ -421,7 +421,7 @@ paths:
           description: Unauthorized
         "403":
           description: Forbidden – SUPER_ADMIN only
-  /events/{id}:
+  "/events/{id}":
     get:
       summary: Get an event by ID
       tags:
@@ -573,7 +573,7 @@ paths:
           description: Forbidden – SUPER_ADMIN only
         "404":
           description: Event not found
-  /events/{id}/register:
+  "/events/{id}/register":
     post:
       summary: Register for an event
       tags:
@@ -734,7 +734,7 @@ paths:
       responses:
         "200":
           description: List of projects retrieved successfully
-  /projects/{id}:
+  "/projects/{id}":
     get:
       summary: Get project details by ID
       tags:
@@ -821,7 +821,7 @@ paths:
       responses:
         "200":
           description: Leaderboard fetched successfully
-  /users/{id}:
+  "/users/{id}":
     get:
       summary: Get a user's public profile
       tags:
@@ -866,26 +866,20 @@ paths:
           description: Profile updated
         "403":
           description: Forbidden
-  /users/{id}/avatar:
+  /users/me/avatar:
     patch:
-      summary: Upload or replace a user's profile avatar
+      summary: Upload or replace the logged-in user's profile avatar
       description: >
         Accepts a multipart/form-data request with an image file in the "avatar"
-        field. The image is validated (size ≤ MAX_AVATAR_SIZE_KB, image/* MIME
-        only), resized to 400×400 px with a face-centered fill crop, uploaded to
-        Cloudinary, and the resulting secure URL is saved to the users table.
-        Only the authenticated account owner may call this endpoint.
+        field. No user ID is required — it is automatically extracted from the
+        JWT token. The image is validated (size ≤ MAX_AVATAR_SIZE_KB, image/*
+        MIME only), resized to 400×400 px with a face-centered fill crop,
+        uploaded to Cloudinary, and the resulting secure URL is saved to the
+        users table.
       tags:
         - Users
       security:
         - BearerAuth: []
-      parameters:
-        - in: path
-          name: id
-          required: true
-          schema:
-            type: string
-          description: The user's id (must match the authenticated user)
       requestBody:
         required: true
         content:
@@ -918,8 +912,6 @@ paths:
           description: No file provided, wrong file type, or file too large
         "401":
           description: Unauthorized — missing or invalid token
-        "403":
-          description: Forbidden — can only update your own avatar
 tags:
   - name: Admin
     description: Admin user management

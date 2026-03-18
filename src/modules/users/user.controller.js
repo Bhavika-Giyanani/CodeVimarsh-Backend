@@ -32,17 +32,18 @@ export const getLeaderboard = async (req, res, next) => {
 };
 
 /**
- * PATCH /users/:id/avatar
+ * PATCH /users/me/avatar
  * Uploads a new avatar image to Cloudinary and stores the resulting URL
  * in the users table.
+ *
+ * No user ID is needed in the URL — the logged-in user's ID is read
+ * automatically from the JWT token (req.user.id set by authenticate middleware).
  *
  * This controller runs AFTER upload.middleware has already:
  *   1. Checked file size ≤ MAX_AVATAR_SIZE_KB
  *   2. Validated MIME type (image/* only)
  *   3. Uploaded the file to Cloudinary with a 400×400 face-crop transformation
  *   4. Set req.file with { path: secureUrl, filename: publicId }
- *
- * Ownership: only the authenticated user can update their own avatar.
  */
 export const uploadAvatar = async (req, res, next) => {
   try {
@@ -55,19 +56,13 @@ export const uploadAvatar = async (req, res, next) => {
       return next(err);
     }
 
-    // ── Guard: account owners only ────────────────────────────────────────────
-    if (req.user.id !== req.params.id) {
-      const err = new Error("You are not allowed to update another user's avatar.");
-      err.statusCode = 403;
-      return next(err);
-    }
+    // User ID is always taken from the JWT token — never from URL params.
+    // This guarantees a user can only ever update their own avatar.
+    const userId   = req.user.id;
+    const avatarUrl = req.file.path;     // Secure Cloudinary HTTPS URL
+    const publicId  = req.file.filename; // Cloudinary public_id
 
-    // multer-storage-cloudinary puts the secure HTTPS URL in req.file.path
-    // and the Cloudinary public_id in req.file.filename
-    const avatarUrl = req.file.path;
-    const publicId  = req.file.filename;
-
-    const updated = await userService.updateAvatar(req.params.id, avatarUrl, publicId);
+    const updated = await userService.updateAvatar(userId, avatarUrl, publicId);
 
     return res.status(200).json({
       success: true,
