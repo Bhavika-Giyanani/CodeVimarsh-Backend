@@ -7,6 +7,8 @@ import {
   createEventSchema,
   updateEventSchema,
   registerEventSchema,
+  addEventSpeakerSchema,
+  updateEventSpeakerSchema,
 } from "./events.schema.js";
 
 const router = Router();
@@ -391,6 +393,143 @@ router.post(
   authenticate,
   validate(registerEventSchema),
   eventsController.registerForEvent
+);
+
+/**
+ * @swagger
+ * /events/{id}/speakers:
+ *   post:
+ *     summary: Add a speaker to an event
+ *     tags: [Events]
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - name
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 example: "John Doe"
+ *               designation:
+ *                 type: string
+ *                 example: "Software Engineer"
+ *               avatar:
+ *                 type: string
+ *                 format: uri
+ *                 example: "https://example.com/avatar.png"
+ *               bio:
+ *                 type: string
+ *                 example: "Expert in Node.js"
+ *     responses:
+ *       201:
+ *         description: Successfully added speaker
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 speaker:
+ *                   type: object
+ *                 message:
+ *                   type: string
+ *                   example: Speaker added successfully.
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden – SUPER_ADMIN only
+ *       404:
+ *         description: Event not found
+ */
+router.post(
+  "/:id/speakers",
+  authenticate,
+  requireSuperAdmin,
+  validate(addEventSpeakerSchema),
+  eventsController.addEventSpeaker
+);
+
+/**
+ * @swagger
+ * /events/speakers/{speakerId}:
+ *   put:
+ *     summary: Update an event speaker
+ *     tags: [Events]
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: speakerId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *               designation:
+ *                 type: string
+ *               avatar:
+ *                 type: string
+ *               bio:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Successfully updated speaker
+ *       404:
+ *         description: Speaker not found
+ */
+router.put(
+  "/speakers/:speakerId",
+  authenticate,
+  requireSuperAdmin,
+  validate(updateEventSpeakerSchema),
+  eventsController.updateEventSpeaker
+);
+
+/**
+ * @swagger
+ * /events/speakers/{speakerId}:
+ *   delete:
+ *     summary: Delete an event speaker
+ *     tags: [Events]
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: speakerId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Successfully deleted speaker
+ *       404:
+ *         description: Speaker not found
+ */
+router.delete(
+  "/speakers/:speakerId",
+  authenticate,
+  requireSuperAdmin,
+  eventsController.deleteEventSpeaker
 );
 
 export default router;

@@ -163,6 +163,7 @@ model Event {
   topics           String[]    // Tags/topics as an array of strings
   created_by       String
   created_at       DateTime    @default(now())
+  event_speaker_id String?
 
   speakers      EventSpeaker[]
   registrations EventRegistration[]

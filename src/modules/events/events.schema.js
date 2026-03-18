@@ -22,3 +22,11 @@ export const registerEventSchema = z.object({
   areas_of_interest: z.array(z.string()).default([]),
   reason_for_participation: z.string().optional(),
 });
+
+export const addEventSpeakerSchema = z.object({
+  name: z.string({ required_error: "Speaker name is required." }).min(2, "Name must be at least 2 characters."),
+  designation: z.string().optional(),
+  avatar: z.string().url("Must be a valid URL.").optional(),
+  bio: z.string().optional(),
+});
+export const updateEventSpeakerSchema = addEventSpeakerSchema.partial();

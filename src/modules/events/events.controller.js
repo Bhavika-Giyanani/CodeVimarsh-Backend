@@ -70,3 +70,38 @@ export const registerForEvent = async (req, res, next) => {
     next(err);
   }
 };
+
+export const addEventSpeaker = async (req, res, next) => {
+  try {
+    const speaker = await eventsService.addEventSpeaker(req.params.id, req.body);
+    res.status(201).json({ success: true, speaker, message: "Speaker added successfully." });
+  } catch (err) {
+    if (err.message === "Event not found") {
+      return res.status(404).json({ success: false, message: err.message });
+    }
+    next(err);
+  }
+};
+export const updateEventSpeaker = async (req, res, next) => {
+  try {
+    const speaker = await eventsService.updateEventSpeaker(req.params.speakerId, req.body);
+    res.status(200).json({ success: true, speaker, message: "Speaker updated successfully." });
+  } catch (err) {
+    if (err.code === "P2025") {
+      return res.status(404).json({ success: false, message: "Speaker not found" });
+    }
+    next(err);
+  }
+};
+
+export const deleteEventSpeaker = async (req, res, next) => {
+  try {
+    const speaker = await eventsService.deleteEventSpeaker(req.params.speakerId);
+    res.status(200).json({ success: true, speaker, message: "Speaker deleted successfully." });
+  } catch (err) {
+    if (err.code === "P2025") {
+      return res.status(404).json({ success: false, message: "Speaker not found" });
+    }
+    next(err);
+  }
+};

@@ -99,3 +99,58 @@ export const registerForEvent = async (eventId, user, data) => {
 
   return registration;
 };
+
+/**
+ * Adds a speaker to an event and updates the event's event_speaker_id.
+ */
+export const addEventSpeaker = async (eventId, data) => {
+  const event = await prisma.event.findUnique({
+    where: { id: eventId },
+  });
+  if (!event) throw new Error("Event not found");
+
+  const speaker = await prisma.eventSpeaker.create({
+    data: {
+      ...data,
+      event_id: eventId,
+    },
+  });
+
+  await prisma.event.update({
+    where: { id: eventId },
+    data: { event_speaker_id: speaker.id },
+  });
+
+  return speaker;
+};
+/**
+ * Updates an event speaker's details.
+ */
+export const updateEventSpeaker = async (speakerId, data) => {
+  const speaker = await prisma.eventSpeaker.update({
+    where: { id: speakerId },
+    data,
+  });
+  return speaker;
+};
+
+/**
+ * Deletes an event speaker.
+ */
+export const deleteEventSpeaker = async (speakerId) => {
+  // optionally nullify the event_speaker_id if it was set, 
+  // though Prisma onDelete might handle it, or we do it manually.
+  // Actually, Event uses `event_speaker_id String?` without strict relation to speaker.id in DB constraints.
+  
+  const speaker = await prisma.eventSpeaker.delete({
+    where: { id: speakerId },
+  });
+  
+  // Clean up if this speaker was marked as the main event speaker
+  await prisma.event.updateMany({
+    where: { event_speaker_id: speakerId },
+    data: { event_speaker_id: null },
+  });
+
+  return speaker;
+};
