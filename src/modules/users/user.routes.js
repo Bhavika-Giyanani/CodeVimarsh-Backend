@@ -95,25 +95,18 @@ router.put(
 
 /**
  * @swagger
- * /users/{id}/avatar:
+ * /users/me/avatar:
  *   patch:
- *     summary: Upload or replace a user's profile avatar
+ *     summary: Upload or replace the logged-in user's profile avatar
  *     description: >
  *       Accepts a multipart/form-data request with an image file in the "avatar" field.
+ *       No user ID is required — it is automatically extracted from the JWT token.
  *       The image is validated (size ≤ MAX_AVATAR_SIZE_KB, image/* MIME only),
  *       resized to 400×400 px with a face-centered fill crop, uploaded to Cloudinary,
  *       and the resulting secure URL is saved to the users table.
- *       Only the authenticated account owner may call this endpoint.
  *     tags: [Users]
  *     security:
  *       - BearerAuth: []
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: string
- *         description: The user's id (must match the authenticated user)
  *     requestBody:
  *       required: true
  *       content:
@@ -146,11 +139,9 @@ router.put(
  *         description: No file provided, wrong file type, or file too large
  *       401:
  *         description: Unauthorized — missing or invalid token
- *       403:
- *         description: Forbidden — can only update your own avatar
  */
 router.patch(
-  "/:id/avatar",
+  "/me/avatar",
   authenticate,
   uploadAvatarMiddleware,
   userController.uploadAvatar,
