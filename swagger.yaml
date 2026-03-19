@@ -37,7 +37,7 @@ paths:
           description: Paginated list of all users
         "403":
           description: Forbidden
-  "/admin/users/{userId}":
+  /admin/users/{userId}:
     get:
       summary: View a user's full profile (CONTENT_ADMIN and above)
       tags:
@@ -55,7 +55,7 @@ paths:
           description: Full user profile with admin data
         "404":
           description: User not found
-  "/admin/users/{userId}/role":
+  /admin/users/{userId}/role:
     patch:
       summary: Change a user's role (SUPER_ADMIN only)
       tags:
@@ -421,7 +421,7 @@ paths:
           description: Unauthorized
         "403":
           description: Forbidden – SUPER_ADMIN only
-  "/events/{id}":
+  /events/{id}:
     get:
       summary: Get an event by ID
       tags:
@@ -573,7 +573,7 @@ paths:
           description: Forbidden – SUPER_ADMIN only
         "404":
           description: Event not found
-  "/events/{id}/register":
+  /events/{id}/register:
     post:
       summary: Register for an event
       tags:
@@ -841,7 +841,7 @@ paths:
       responses:
         "200":
           description: List of projects retrieved successfully
-  "/projects/{id}":
+  /projects/{id}:
     get:
       summary: Get project details by ID
       tags:
@@ -928,7 +928,7 @@ paths:
       responses:
         "200":
           description: Leaderboard fetched successfully
-  "/users/{id}":
+  /users/{id}:
     get:
       summary: Get a user's public profile
       tags:
